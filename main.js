@@ -59,13 +59,13 @@ function scan(input) {
         
       const char = input[i];
       
-      //white spaces
+      //remove white spaces,tabs and newlines
       if (/\s/.test(char)) {
             i++;
             continue;
         }
 
-      //comments
+      //Handle comments
       if (char === "{") {
             i++; // skip first open curly
             while (i < input.length && input[i] !== "}") {
