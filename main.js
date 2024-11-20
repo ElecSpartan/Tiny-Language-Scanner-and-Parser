@@ -66,15 +66,18 @@ function scan(input) {
         }
 
       //Handle comments
+      let notClosedFlag = 0;        //flag to handle unclosed brackets
+
       if (char === "{") {
             i++; // skip first open curly
             while (i < input.length && input[i] !== "}") {
+                notClosedFlag = 1;
                 i++;
             }
+            notClosedFlag = 0;
             i++; 
             continue;
       }
-      //No closing curly is NOT HANDLED
 
 
       // Handle keywords and identifiers
@@ -119,6 +122,8 @@ function scan(input) {
       throw new Error(`Unexpected character: ${char}`);
     }
 
+    if(notClosedFlag)
+        throw new Error(`There is Unclosed Curly!`);
     return tokens;
 }
 
