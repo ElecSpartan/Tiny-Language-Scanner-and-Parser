@@ -122,6 +122,29 @@ function scan(input) {
     return tokens;
 }
 
+function handleScan(event) {
+
+    event.preventDefault()
+    const input = document.getElementById("inputId").value;
+    const tokens = scan(input)
+    
+    const table = document.getElementById("tableId")
+    table.innerHTML = "";
+    for (let token of tokens) {
+        let tokenType = document.createElement("td")
+        tokenType.innerText = token.tokenType
+        let tokenVal = document.createElement("td")
+        tokenVal.innerText = token.stringVal || token.intVal
+
+        let row = document.createElement("tr")
+        row.append(tokenType, tokenVal)
+        table.appendChild(row)
+    }
+
+}
+
+const button = document.getElementById("buttonId");
+button.addEventListener('click', handleScan);
 
 const sourceCode = `
 read x; {input an integer}
