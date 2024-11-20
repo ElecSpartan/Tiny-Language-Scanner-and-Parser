@@ -1,4 +1,4 @@
-const TokenType = Object.freeze([
+const tokenType = Object.freeze([
     "SEMICOLON",
     "IF",
     "THEN",
@@ -44,8 +44,8 @@ const Symbols = {
 };
 
 class TokenRecord {
-    constructor(TokenType,stringVal = "", intVal = 0) {
-        this.TokenType = TokenType;
+    constructor(tokenType, stringVal, intVal) {
+        this.tokenType = tokenType;
         this.stringVal = stringVal;
         this.intVal = intVal;
     }
@@ -138,7 +138,7 @@ end
 const tokens = scan(sourceCode);
 
 tokens.forEach(token => {
-    console.log(`Type: ${token.TokenType}, Value: ${token.stringVal || token.intVal}`);
+    console.log(`Type: ${token.tokenType}, Value: ${token.stringVal || token.intVal}`);
 });
 
 
