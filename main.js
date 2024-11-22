@@ -54,6 +54,7 @@ class TokenRecord {
 function scan(input) {
     const tokens = [];
     let i = 0;
+    let notClosedFlag = 0;        //flag to handle unclosed brackets
 
     while (i < input.length) {
         
@@ -66,18 +67,24 @@ function scan(input) {
         }
 
       //Handle comments
-      let notClosedFlag = 0;        //flag to handle unclosed brackets
 
       if (char === "{") {
             i++; // skip first open curly
-            while (i < input.length && input[i] !== "}") {
-                notClosedFlag = 1;
+            notClosedFlag = 1;
+            while (i < input.length) {
+                if (input[i] == "}") {
+                    notClosedFlag = 0;
+                    i++;
+                    break;
+                }
                 i++;
             }
-            notClosedFlag = 0;
-            i++; 
             continue;
       }
+
+      if (char === "}") {
+        throw new Error(`There is Lone Close Curly!`);
+  }
 
 
       // Handle keywords and identifiers
@@ -123,7 +130,7 @@ function scan(input) {
     }
 
     if(notClosedFlag)
-        throw new Error(`There is Unclosed Curly!`);
+        throw new Error(`There is Lone Open Curly!`);
     return tokens;
 }
 
@@ -131,20 +138,44 @@ function handleScan(event) {
 
     event.preventDefault()
     const input = document.getElementById("inputId").value;
-    const tokens = scan(input)
     
-    const table = document.getElementById("tableId")
-    table.innerHTML = "";
-    for (let token of tokens) {
-        let tokenType = document.createElement("td")
-        tokenType.innerText = token.tokenType
-        let tokenVal = document.createElement("td")
-        tokenVal.innerText = token.stringVal || token.intVal
+    const error = document.getElementById("errorId")
+    const noerror = document.getElementById('outputId')
+    
+    let tokens
+    try {
+        tokens = scan(input)
+    } catch (err) {
+        error.classList.remove("hidden")
+        noerror.classList.add("hidden")
 
-        let row = document.createElement("tr")
-        row.append(tokenType, tokenVal)
-        table.appendChild(row)
+        error.innerHTML = `<p>${err}</p>`;
+        return
     }
+    
+    
+    if (tokens.length > 0) {
+        error.classList.add("hidden")
+        noerror.classList.remove("hidden")
+        
+        const table = document.getElementById("tableId")
+        table.innerHTML = "";
+        
+        for (let token of tokens) {
+            let tokenType = document.createElement("td")
+            tokenType.innerText = token.tokenType
+            let tokenVal = document.createElement("td")
+            tokenVal.innerText = token.stringVal || token.intVal
+    
+            let row = document.createElement("tr")
+            row.append(tokenType, tokenVal)
+            table.appendChild(row)
+        }
+    } else {
+        error.classList.remove("hidden")
+        noerror.classList.add("hidden")
+    }
+    
 
 }
 

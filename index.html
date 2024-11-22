@@ -8,7 +8,11 @@
 </head>
 <body>
     
-    <h1>Tiny Language Parser</h1>
+    <div class="title">
+        <img src="cat.png">
+        <h1>Tiny Language Parser</h1>
+        <img src="cat.png">
+    </div>
 
     <div class="upper_container">
         <button id="buttonId">Scan the Code</button>
@@ -17,7 +21,10 @@
     <div class="lower_container">
         <textarea id="inputId" placeholder="Enter the Tiny code here."></textarea>
         <div class="table_container">
-            <table>
+            <div id="errorId" class="no_output_container">
+                <p>Output will show here</p>
+            </div>
+            <table id="outputId" class="hidden">
                 <thead>
                     <tr>
                         <th>Token Type</th>
