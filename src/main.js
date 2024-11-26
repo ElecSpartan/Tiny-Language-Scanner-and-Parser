@@ -2,6 +2,7 @@ const tokenType = Object.freeze([
     "SEMICOLON",
     "IF",
     "THEN",
+    "ELSE",
     "END",
     "REPEAT",
     "UNTIL",
@@ -23,6 +24,7 @@ const tokenType = Object.freeze([
 const Keywords = {
     if: "IF",
     then: "THEN",
+    else: "ELSE",
     end: "END",
     repeat: "REPEAT",
     until: "UNTIL",
@@ -44,10 +46,9 @@ const Symbols = {
 };
 
 class TokenRecord {
-    constructor(tokenType, stringVal, intVal) {
+    constructor(tokenType, tokenValue) {
         this.tokenType = tokenType;
-        this.stringVal = stringVal;
-        this.intVal = intVal;
+        this.tokenValue = tokenValue;
     }
 }
 
@@ -72,7 +73,7 @@ function scan(input) {
             i++; // skip first open curly
             notClosedFlag = 1;
             while (i < input.length) {
-                if (input[i] == "}") {
+                if (input[i] === "}") {
                     notClosedFlag = 0;
                     i++;
                     break;
@@ -108,7 +109,7 @@ function scan(input) {
                 i++;
             }
 
-            tokens.push(new TokenRecord("NUMBER", "", parseInt(number, 10)));
+            tokens.push(new TokenRecord("NUMBER", number));
             continue;
         }
 
@@ -165,7 +166,7 @@ function handleScan(event) {
             let tokenType = document.createElement("td")
             tokenType.innerText = token.tokenType
             let tokenVal = document.createElement("td")
-            tokenVal.innerText = token.stringVal || token.intVal
+            tokenVal.innerText = token.tokenValue;
     
             let row = document.createElement("tr")
             row.append(tokenType, tokenVal)
@@ -197,7 +198,7 @@ end
 const tokens = scan(sourceCode);
 
 tokens.forEach(token => {
-    console.log(`Type: ${token.tokenType}, Value: ${token.stringVal || token.intVal}`);
+    console.log(`Type: ${token.tokenType}, Value: ${token.tokenValue}`);
 });
 
 
