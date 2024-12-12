@@ -50,7 +50,8 @@ textarea {
     resize: none;
     height: 60vh;
     font-size: 1.2rem;
-    border-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
     padding: 0.8em;
     background-color: rgb(250, 226, 230);
     /* border: 2px solid black; */
@@ -70,6 +71,7 @@ textarea {
     background-color: rgb(250, 226, 230);
     font-size: 1.2rem;
     color: rgb(59, 59, 59);
+    font-weight: 600;
 }
 
 .table_container {
@@ -90,13 +92,13 @@ table {
     background-color: rgb(255, 219, 225);
     border-spacing: 0;
     border-collapse: collapse;
-
 }
 
 thead {
     position: sticky;
     top: 0;
     background-color: plum;
+    font-size: 1.3rem;
 }
 
 th, td {
@@ -152,6 +154,13 @@ button:hover {
     justify-content: space-between;
     align-items: center;
     padding: 0 15px;
+}
+
+#tree_container {
+    background-color: rgb(250, 226, 230);
+    border: 2px solid black;
+    border-radius: 12px;
+    margin-top: 20px;
 }
 
 .tree_node {

@@ -1,8 +1,8 @@
 {
-  "name": "my-app",
-  "productName": "my-app",
+  "name": "cute-compiler",
+  "productName": "cute-compiler",
   "version": "1.0.0",
-  "description": "Hi, I am the scanner",
+  "description": "Hi, I am the cute compiler",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -29,7 +29,7 @@
   },
   "keywords": [],
   "author": {
-    "name": "Ali Mohsen",
+    "name": "Mr Tiny Cat-piler",
     "email": "ali_m_2001@hotmail.com"
   },
   "license": "MIT"
