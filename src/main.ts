@@ -1,4 +1,4 @@
-const tokenType = Object.freeze([
+const tokenType = [
     "SEMICOLON",
     "IF",
     "THEN",
@@ -19,9 +19,11 @@ const tokenType = Object.freeze([
     "OPENBRACKET",
     "CLOSEDBRACKET",
     "NUMBER",
-]);
+] as const;
 
-const Keywords = {
+type TokenType = typeof tokenType[number];
+
+const Keywords: Record<string, TokenType> = {
     if: "IF",
     then: "THEN",
     else: "ELSE",
@@ -30,9 +32,9 @@ const Keywords = {
     until: "UNTIL",
     read: "READ",
     write: "WRITE",
-};
+} as const;
 
-const Symbols = {
+const Symbols: Record<string, TokenType> = {
     ";": "SEMICOLON",
     ":=": "ASSIGN",
     "<": "LESSTHAN",
@@ -43,17 +45,20 @@ const Symbols = {
     "/": "DIV",
     "(": "OPENBRACKET",
     ")": "CLOSEDBRACKET",
-};
+} as const;
 
 class TokenRecord {
-    constructor(tokenType, tokenValue) {
+    tokenType: TokenType;
+    tokenValue: string;
+
+    constructor(tokenType: TokenType, tokenValue: string) {
         this.tokenType = tokenType;
         this.tokenValue = tokenValue;
     }
 }
 
-function scan(input) {
-    const tokens = [];
+function scan(input: string): TokenRecord[] {
+    const tokens: TokenRecord[] = [];
     let i = 0;
     let notClosedFlag = 0;        //flag to handle unclosed brackets
 
@@ -135,15 +140,23 @@ function scan(input) {
     return tokens;
 }
 
-function handleScan(event) {
+function handleScan(event: Event) {
 
     event.preventDefault()
-    const input = document.getElementById("inputId").value;
+    const input = (document.getElementById("inputId") as HTMLInputElement).value;
     
-    const error = document.getElementById("errorId")
-    const noerror = document.getElementById('outputId')
+    const error = document.getElementById("errorId")!
+    const noerror = document.getElementById('outputId')!
+
+    if (!input) {
+        error.classList.remove("hidden")
+        noerror.classList.add("hidden")
+
+        error.innerHTML = `<p>Input is empty!</p>`;
+        return
+    }
     
-    let tokens
+    let tokens: TokenRecord[];
     try {
         tokens = scan(input)
     } catch (err) {
@@ -159,7 +172,7 @@ function handleScan(event) {
         error.classList.add("hidden")
         noerror.classList.remove("hidden")
         
-        const table = document.getElementById("tableId")
+        const table = document.getElementById("tableId")!; 
         table.innerHTML = "";
         
         for (let token of tokens) {
@@ -180,7 +193,7 @@ function handleScan(event) {
 
 }
 
-const button = document.getElementById("buttonId");
+const button = document.getElementById("buttonId")!;
 button.addEventListener('click', handleScan);
 
 const sourceCode = `

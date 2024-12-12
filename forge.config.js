@@ -3,7 +3,7 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
-    icon: 'E:\Desktop\Github\Tiny-Language-Scanner-and-Parser\my-app\src\cat.ico'
+    icon: 'E:\Desktop\Github\Tiny-Language-Scanner-and-Parser\my-app\dist\cat.ico'
   },
   packagerConfig: {
     asar: true,
