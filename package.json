@@ -5,6 +5,7 @@
   "description": "Hi, I am the scanner",
   "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
