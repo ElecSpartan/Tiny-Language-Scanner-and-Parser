@@ -1,4 +1,7 @@
 "use strict";
+/****************************************/
+/*********  Tokens and Symbols  *********/
+/****************************************/
 const tokenType = [
     "SEMICOLON",
     "IF",
@@ -49,6 +52,9 @@ class TokenRecord {
         this.tokenValue = tokenValue;
     }
 }
+/****************************************/
+/**************  Scanner  ***************/
+/****************************************/
 function scan(input) {
     const tokens = [];
     let i = 0;
@@ -116,50 +122,9 @@ function scan(input) {
         throw new Error(`There is Lone Open Curly!`);
     return tokens;
 }
-function handleScan(event) {
-    event.preventDefault();
-    const input = document.getElementById("inputId").value;
-    const error = document.getElementById("errorId");
-    const noerror = document.getElementById('outputId');
-    if (!input) {
-        error.classList.remove("hidden");
-        noerror.classList.add("hidden");
-        error.innerHTML = `<p>Input is empty!</p>`;
-        return;
-    }
-    let tokens;
-    try {
-        tokens = scan(input);
-    }
-    catch (err) {
-        error.classList.remove("hidden");
-        noerror.classList.add("hidden");
-        error.innerHTML = `<p>${err}</p>`;
-        return;
-    }
-    if (tokens.length > 0) {
-        error.classList.add("hidden");
-        noerror.classList.remove("hidden");
-        const table = document.getElementById("tableId");
-        table.innerHTML = "";
-        for (let token of tokens) {
-            let tokenType = document.createElement("td");
-            tokenType.innerText = token.tokenType;
-            let tokenVal = document.createElement("td");
-            tokenVal.innerText = token.tokenValue;
-            let row = document.createElement("tr");
-            row.append(tokenType, tokenVal);
-            table.appendChild(row);
-        }
-    }
-    else {
-        error.classList.remove("hidden");
-        noerror.classList.add("hidden");
-    }
-}
-const button = document.getElementById("buttonId");
-button.addEventListener('click', handleScan);
-// ------------------- Parser -------------------
+/****************************************/
+/***************  Parser  ***************/
+/****************************************/
 class SyntaxNode {
     constructor(type) {
         this.children = [];
@@ -168,6 +133,20 @@ class SyntaxNode {
     }
     addChild(node) {
         this.children.push(node);
+    }
+    drawTree(depth = 0) {
+        var node_json = {
+            text: {
+                name: `${this.type}`,
+                title: `${this.metadata ? this.metadata : ""}`
+            },
+            children: []
+        };
+        for (const child of this.children) {
+            var child_json = child.drawTree(depth + 1);
+            node_json["children"].push(child_json);
+        }
+        return node_json;
     }
 }
 class Parser {
@@ -180,7 +159,6 @@ class Parser {
     }
     matchToken(tokenType) {
         if (this.currentToken().tokenType === tokenType) {
-            console.log(`Matched token: ${tokenType}: ${this.currentToken().tokenValue}`);
             this.currentTokenIndex++;
         }
         else {
@@ -309,27 +287,85 @@ class Parser {
         return this.stmt_seq();
     }
 }
-// ------------------- Test -------------------
-function parse(tokens) {
-    const parser = new Parser(tokens);
-    return parser.parse();
-}
-function printSyntaxTree(node, depth = 0) {
-    console.log("|__".repeat(depth) + node.type + (node.metadata ? `: ${node.metadata}` : ""));
-    for (const child of node.children) {
-        printSyntaxTree(child, depth + 1);
+/****************************************/
+/***********  Button Handler  ***********/
+/****************************************/
+function handleScanAndParse(event) {
+    event.preventDefault();
+    const input = document.getElementById("inputId").value;
+    const error = document.getElementById("errorId");
+    const noerror = document.getElementById('outputId');
+    const tree = document.getElementById('tree_section');
+    if (!input) {
+        error.classList.remove("hidden");
+        noerror.classList.add("hidden");
+        tree.classList.add("hidden");
+        error.innerHTML = `<p>Input is empty!</p>`;
+        return;
+    }
+    let tokens;
+    try {
+        tokens = scan(input);
+    }
+    catch (err) {
+        error.classList.remove("hidden");
+        noerror.classList.add("hidden");
+        tree.classList.add("hidden");
+        error.innerHTML = `<p>${err}</p>`;
+        return;
+    }
+    if (tokens.length > 0) {
+        error.classList.add("hidden");
+        noerror.classList.remove("hidden");
+        tree.classList.remove("hidden");
+        const table = document.getElementById("tableId");
+        table.innerHTML = "";
+        for (let token of tokens) {
+            let tokenType = document.createElement("td");
+            tokenType.innerText = token.tokenType;
+            let tokenVal = document.createElement("td");
+            tokenVal.innerText = token.tokenValue;
+            let row = document.createElement("tr");
+            row.append(tokenType, tokenVal);
+            table.appendChild(row);
+        }
+        const parser = new Parser(tokens);
+        const syntaxTree = parser.parse();
+        var chart_config = {
+            chart: {
+                container: "#tree_container",
+                connectors: {
+                    type: 'bCurve',
+                    style: {
+                        'stroke': '#c748ac',
+                        'arrow-end': 'oval-wide-long'
+                    }
+                },
+                node: {
+                    HTMLclass: 'tree_node',
+                }
+            },
+            nodeStructure: {}
+        };
+        chart_config["nodeStructure"] = syntaxTree.drawTree();
+        new Treant(chart_config);
+    }
+    else {
+        error.classList.remove("hidden");
+        noerror.classList.add("hidden");
+        tree.classList.add("hidden");
     }
 }
-const test = scan(`
-    read x; {input an integer}
-    if 0 < x then { don’t compute if x <= 0}
-    fact := 1;
-    repeat
-    fact := fact * x;
-    x := x - 1
-    until x = 0;
-    write fact { output factorial of x }
-    end
-`);
-const syntaxTree = parse(test);
-printSyntaxTree(syntaxTree);
+const button = document.getElementById("buttonId");
+button.addEventListener('click', handleScanAndParse);
+/*
+read x; {input an integer}
+if 0 < x then { don’t compute if x <= 0}
+fact := 1;
+repeat
+fact := fact * x;
+x := x - 1
+until x = 0;
+write fact { output factorial of x }
+end
+*/ 

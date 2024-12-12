@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiny Language Scanner</title>
+    <link rel="stylesheet" href="treant/Treant.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -32,16 +33,26 @@
                     </tr>
                 </thead>
                 <tbody id="tableId">
-                    <tr>
-                        <td>Token Type</td>
-                        <td>Token Value</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-<script src="main.js"></script>
+    <div id="tree_section" class="hidden">
+        <h3 class="parse_title">Parse Tree</h3>
+        <div class="tree_wrapper">
+            <img src="kirby.gif" style="transform: rotateY(180deg);" alt="">
+            <div class="chart" id="tree_container"></div>
+            <img src="kirby.gif" alt="">
+        </div>
+    </div>
+    
+    <script src="treant/vendor/raphael.js"></script>
+    <script src="treant/Treant.js"></script>
+    
+    <script src="main.js"></script>
+    <script>
+    </script>
 
 </body>
 </html>

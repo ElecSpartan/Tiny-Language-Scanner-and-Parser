@@ -1,3 +1,6 @@
+/****************************************/
+/*********  Tokens and Symbols  *********/
+/****************************************/
 
 const tokenType = [
     "SEMICOLON",
@@ -57,6 +60,10 @@ class TokenRecord {
         this.tokenValue = tokenValue;
     }
 }
+
+/****************************************/
+/**************  Scanner  ***************/
+/****************************************/
 
 function scan(input: string): TokenRecord[] {
     const tokens: TokenRecord[] = [];
@@ -141,65 +148,9 @@ function scan(input: string): TokenRecord[] {
     return tokens;
 }
 
-function handleScan(event: Event) {
-
-    event.preventDefault()
-    const input = (document.getElementById("inputId") as HTMLInputElement).value;
-    
-    const error = document.getElementById("errorId")!
-    const noerror = document.getElementById('outputId')!
-
-    if (!input) {
-        error.classList.remove("hidden")
-        noerror.classList.add("hidden")
-
-        error.innerHTML = `<p>Input is empty!</p>`;
-        return
-    }
-    
-    let tokens: TokenRecord[];
-    try {
-        tokens = scan(input)
-    } catch (err) {
-        error.classList.remove("hidden")
-        noerror.classList.add("hidden")
-
-        error.innerHTML = `<p>${err}</p>`;
-        return
-    }
-    
-    
-    if (tokens.length > 0) {
-        error.classList.add("hidden")
-        noerror.classList.remove("hidden")
-        
-        const table = document.getElementById("tableId")!; 
-        table.innerHTML = "";
-        
-        for (let token of tokens) {
-            let tokenType = document.createElement("td")
-            tokenType.innerText = token.tokenType
-            let tokenVal = document.createElement("td")
-            tokenVal.innerText = token.tokenValue;
-    
-            let row = document.createElement("tr")
-            row.append(tokenType, tokenVal)
-            table.appendChild(row)
-        }
-    } else {
-        error.classList.remove("hidden")
-        noerror.classList.add("hidden")
-    }
-    
-
-}
-
-const button = document.getElementById("buttonId")!;
-button.addEventListener('click', handleScan);
-
-
-// ------------------- Parser -------------------
-
+/****************************************/
+/***************  Parser  ***************/
+/****************************************/
 
 class SyntaxNode {
     public type: string;
@@ -212,6 +163,21 @@ class SyntaxNode {
 
     public addChild(node: SyntaxNode) {
         this.children.push(node);
+    }
+
+    public drawTree(depth: number = 0): any {
+        var node_json = {
+            text: {
+                name: `${this.type}`,
+                title: `${this.metadata ? this.metadata : ""}`
+            },
+            children: [] as any
+        }
+        for (const child of this.children) {
+            var child_json = child.drawTree(depth + 1);
+            node_json["children"].push(child_json);
+        }
+        return node_json
     }
 }
 
@@ -229,7 +195,6 @@ class Parser {
 
     private matchToken(tokenType: TokenType) {
         if (this.currentToken().tokenType === tokenType) {
-            console.log(`Matched token: ${tokenType}: ${this.currentToken().tokenValue}`);
             this.currentTokenIndex++;
         } else {
             throw new Error(`Unexpected token: ${this.currentToken().tokenValue} in position ${this.currentTokenIndex}. Expected: ${tokenType}`);
@@ -368,34 +333,105 @@ class Parser {
     public parse(): SyntaxNode {
         return this.stmt_seq();
     }
+
 }
 
-// ------------------- Test -------------------
+/****************************************/
+/***********  Button Handler  ***********/
+/****************************************/
 
-function parse(tokens: TokenRecord[]): SyntaxNode {
-    const parser = new Parser(tokens);
-    return parser.parse();
-}
+function handleScanAndParse(event: Event) {
 
-function printSyntaxTree(node: SyntaxNode, depth: number = 0) {
-    console.log("|__".repeat(depth) + node.type + (node.metadata ? `: ${node.metadata}` : ""));
-    for (const child of node.children) {
-        printSyntaxTree(child, depth + 1);
+    event.preventDefault()
+    const input = (document.getElementById("inputId") as HTMLInputElement).value;
+    
+    const error = document.getElementById("errorId")!
+    const noerror = document.getElementById('outputId')!
+    const tree = document.getElementById('tree_section')!
+
+    if (!input) {
+        error.classList.remove("hidden")
+        noerror.classList.add("hidden")
+        tree.classList.add("hidden")
+
+        error.innerHTML = `<p>Input is empty!</p>`;
+        return
     }
+    
+    let tokens: TokenRecord[];
+    try {
+        tokens = scan(input)
+    } catch (err) {
+        error.classList.remove("hidden")
+        noerror.classList.add("hidden")
+        tree.classList.add("hidden")
+
+        error.innerHTML = `<p>${err}</p>`;
+        return
+    }
+    
+    
+    if (tokens.length > 0) {
+        error.classList.add("hidden")
+        noerror.classList.remove("hidden")
+        tree.classList.remove("hidden")
+        
+        const table = document.getElementById("tableId")!; 
+        table.innerHTML = "";
+        
+        for (let token of tokens) {
+            let tokenType = document.createElement("td")
+            tokenType.innerText = token.tokenType
+            let tokenVal = document.createElement("td")
+            tokenVal.innerText = token.tokenValue;
+    
+            let row = document.createElement("tr")
+            row.append(tokenType, tokenVal)
+            table.appendChild(row)
+        }
+
+        const parser = new Parser(tokens);
+        const syntaxTree = parser.parse();
+
+        var chart_config = {
+            chart: {
+                container: "#tree_container",
+                connectors: {
+                    type: 'bCurve',
+                    style: {
+                        'stroke': '#c748ac',
+                        'arrow-end': 'oval-wide-long'
+                    }
+                },
+                node: {
+                    HTMLclass: 'tree_node',
+                }
+            },
+            nodeStructure: {}
+        }
+        chart_config["nodeStructure"] = syntaxTree.drawTree();
+        new Treant( chart_config );
+        
+    } else {
+        error.classList.remove("hidden")
+        noerror.classList.add("hidden")
+        tree.classList.add("hidden")
+    }
+    
+
 }
 
-const test = scan(`
-    read x; {input an integer}
-    if 0 < x then { don’t compute if x <= 0}
-    fact := 1;
-    repeat
-    fact := fact * x;
-    x := x - 1
-    until x = 0;
-    write fact { output factorial of x }
-    end
-`);
+const button = document.getElementById("buttonId")!;
+button.addEventListener('click', handleScanAndParse);
 
-const syntaxTree = parse(test);
-
-printSyntaxTree(syntaxTree);
+/*
+read x; {input an integer}
+if 0 < x then { don’t compute if x <= 0}
+fact := 1;
+repeat
+fact := fact * x;
+x := x - 1
+until x = 0;
+write fact { output factorial of x }
+end
+*/
