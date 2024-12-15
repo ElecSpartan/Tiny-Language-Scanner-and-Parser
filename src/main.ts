@@ -229,7 +229,7 @@ class Parser {
     }
 
     private if_stmt(): SyntaxNode {
-        const node = new SyntaxNode("if_stmt");
+        const node = new SyntaxNode("if");
         this.matchToken("IF");
         node.addChild(this.exp());
         this.matchToken("THEN");
@@ -243,7 +243,7 @@ class Parser {
     }
 
     private repeat_stmt(): SyntaxNode {
-        const node = new SyntaxNode("repeat_stmt");
+        const node = new SyntaxNode("repeat");
         this.matchToken("REPEAT");
         node.addChild(this.stmt_seq());
         this.matchToken("UNTIL");
@@ -252,7 +252,7 @@ class Parser {
     }
 
     private assign_stmt(): SyntaxNode {
-        const node = new SyntaxNode("assign_stmt");
+        const node = new SyntaxNode("assign");
         node.metadata = this.currentToken().tokenValue;
         this.matchToken("IDENTIFIER");
         this.matchToken("ASSIGN");
@@ -261,7 +261,7 @@ class Parser {
     }
 
     private read_stmt(): SyntaxNode {
-        const node = new SyntaxNode("read_stmt");
+        const node = new SyntaxNode("read");
         this.matchToken("READ");
         node.metadata = this.currentToken().tokenValue;
         this.matchToken("IDENTIFIER");
@@ -269,17 +269,19 @@ class Parser {
     }
 
     private write_stmt(): SyntaxNode {
-        const node = new SyntaxNode("write_stmt");
+        const node = new SyntaxNode("write");
         this.matchToken("WRITE");
         node.addChild(this.exp());
         return node;
     }
 
     private exp(): SyntaxNode {
-        const node = new SyntaxNode("exp");
-        node.addChild(this.simple_exp());
+        let node = this.simple_exp();
         if (this.currentToken().tokenType === "LESSTHAN" || this.currentToken().tokenType === "EQUAL") {
+            let oldNode = node;
+            node = new SyntaxNode("op");
             node.metadata = this.currentToken().tokenValue;
+            node.addChild(oldNode);
             this.matchToken(this.currentToken().tokenType);
             node.addChild(this.simple_exp());
         }
@@ -287,10 +289,14 @@ class Parser {
     }
 
     private simple_exp(): SyntaxNode {
-        const node = new SyntaxNode("simple_exp");
-        node.addChild(this.term());
+        // const node = new SyntaxNode("simple_exp");
+        // node.addChild(this.term());
+        let node = this.term();
         while (this.currentToken().tokenType === "PLUS" || this.currentToken().tokenType === "MINUS") {
+            let oldNode = node;
+            node = new SyntaxNode("op");
             node.metadata = this.currentToken().tokenValue;
+            node.addChild(oldNode);
             this.matchToken(this.currentToken().tokenType);
             node.addChild(this.term());
         }
@@ -298,10 +304,12 @@ class Parser {
     }
 
     private term(): SyntaxNode {
-        const node = new SyntaxNode("term");
-        node.addChild(this.factor());
+        let node = this.factor();
         while (this.currentToken().tokenType === "MULT" || this.currentToken().tokenType === "DIV") {
+            let oldNode = node;
+            node = new SyntaxNode("op");
             node.metadata = this.currentToken().tokenValue;
+            node.addChild(oldNode);
             this.matchToken(this.currentToken().tokenType);
             node.addChild(this.factor());
         }
@@ -317,10 +325,12 @@ class Parser {
                 this.matchToken("CLOSEDBRACKET");
                 break;
             case "IDENTIFIER":
+                node.type = "id"
                 node.metadata = this.currentToken().tokenValue;
                 this.matchToken("IDENTIFIER");
                 break;
             case "NUMBER":
+                node.type = "const"
                 node.metadata = this.currentToken().tokenValue;
                 this.matchToken("NUMBER");
                 break;
