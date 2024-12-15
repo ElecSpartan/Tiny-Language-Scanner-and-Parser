@@ -4,7 +4,7 @@ This project simulates the scanning and parsing operatins that are done in many 
 
 ## Executable File Link
 
-[link](https://drive.google.com/drive/folders/11-vmAsfLdHfCcl8SKNQ27EFAmm-NI2IT?usp=drive_link)
+[link](https://github.com/ElecSpartan/Tiny-Language-Scanner-and-Parser/releases/tag/v.1.0)
 
 ## installation and running
 
