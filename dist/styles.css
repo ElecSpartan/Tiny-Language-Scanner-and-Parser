@@ -30,6 +30,8 @@ img {
 }
 
 .upper_container {
+    position: relative;
+    margin: 0 1rem;
     display: flex;
     justify-content: center;
 }
@@ -190,6 +192,20 @@ button:hover {
 .node-title {
     color: darkorchid;
 }
+
+.tree_node:has(.node-dece) {
+    border-radius: 100%;
+}
+
+.node-dece {
+    display: none;
+}
+
+#uploadButtonId {
+    position: absolute;
+    left: 0;
+}
+
 
 .parse_title {
     background-color: plum;

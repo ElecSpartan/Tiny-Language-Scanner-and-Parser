@@ -135,18 +135,48 @@ class SyntaxNode {
         this.children.push(node);
     }
     drawTree(depth = 0) {
-        var node_json = {
-            text: {
-                name: `${this.type}`,
-                title: `${this.metadata ? this.metadata : ""}`
-            },
-            children: []
-        };
-        for (const child of this.children) {
-            var child_json = child.drawTree(depth + 1);
-            node_json["children"].push(child_json);
+        if (this.type == "stmt_seq" && depth > 0) {
+            var children = [];
+            for (const child of this.children) {
+                children.push(child.drawTree(depth + 1));
+            }
+            return children;
         }
-        return node_json;
+        else {
+            var circle = this.type == "op" || this.type == "const" || this.type == "id";
+            var node_json;
+            if (circle) {
+                node_json = {
+                    text: {
+                        name: `${this.type}`,
+                        title: `${this.metadata ? "(" + this.metadata + ")" : ""}`,
+                        dece: ""
+                    },
+                    children: []
+                };
+            }
+            else {
+                node_json = {
+                    text: {
+                        name: `${this.type == "stmt_seq" ? "" : this.type}`,
+                        title: `${this.metadata ? "(" + this.metadata + ")" : ""}`
+                    },
+                    children: []
+                };
+            }
+            for (const child of this.children) {
+                var child_json = child.drawTree(depth + 1);
+                if (Array.isArray(child_json)) {
+                    for (var subchild of child_json) {
+                        node_json["children"].push(subchild);
+                    }
+                }
+                else {
+                    node_json["children"].push(child_json);
+                }
+            }
+            return node_json;
+        }
     }
 }
 class Parser {
@@ -366,8 +396,29 @@ function handleScanAndParse(event) {
         tree.classList.add("hidden");
     }
 }
+function handleUpload(event) {
+    event.preventDefault();
+    const readFile = function (e) {
+        var file = e.target.files[0];
+        if (!file) {
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            const textarea = document.getElementById("inputId");
+            textarea.value = reader.result;
+        };
+        reader.readAsText(file);
+    };
+    var inputfile = document.createElement('input');
+    inputfile.type = 'file';
+    inputfile.onchange = readFile;
+    inputfile.click();
+}
 const button = document.getElementById("buttonId");
 button.addEventListener('click', handleScanAndParse);
+const upload_button = document.getElementById("uploadButtonId");
+upload_button.addEventListener('click', handleUpload);
 /*
 read x; {input an integer}
 if 0 < x then { don’t compute if x <= 0}

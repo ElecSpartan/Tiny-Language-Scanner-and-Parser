@@ -166,18 +166,45 @@ class SyntaxNode {
     }
 
     public drawTree(depth: number = 0): any {
-        var node_json = {
-            text: {
-                name: `${this.type}`,
-                title: `${this.metadata ? this.metadata : ""}`
-            },
-            children: [] as any
+        if (this.type == "stmt_seq" && depth > 0) {
+            var children = []
+            for (const child of this.children) {
+                children.push(child.drawTree(depth + 1));
+            }
+            return children
+        } else {
+            var circle = this.type == "op" || this.type == "const" || this.type == "id"
+            var node_json
+            if (circle) {
+                node_json = {
+                    text: {
+                        name: `${this.type}`,
+                        title: `${this.metadata ? "(" + this.metadata + ")" : ""}`,
+                        dece: ""
+                    },
+                    children: [] as any
+                }
+            } else {
+                node_json = {
+                    text: {
+                        name: `${this.type == "stmt_seq" ? "" : this.type}`,
+                        title: `${this.metadata ? "(" + this.metadata + ")" : ""}`
+                    },
+                    children: [] as any
+                }
+            }
+            for (const child of this.children) {
+                var child_json = child.drawTree(depth + 1);
+                if (Array.isArray(child_json)) {
+                    for (var subchild of child_json) {
+                        node_json["children"].push(subchild)
+                    }
+                } else {
+                    node_json["children"].push(child_json);
+                }
+            }
+            return node_json
         }
-        for (const child of this.children) {
-            var child_json = child.drawTree(depth + 1);
-            node_json["children"].push(child_json);
-        }
-        return node_json
     }
 }
 
@@ -431,8 +458,34 @@ function handleScanAndParse(event: Event) {
 
 }
 
+function handleUpload(event: Event) {
+    event.preventDefault()
+
+    const readFile = function(e: any) {
+		var file = e.target.files[0];
+		if (!file) {
+            return;
+		}
+        var reader = new FileReader();
+		reader.onload = function(e: any) {
+            const textarea = document.getElementById("inputId") as any;
+            textarea.value = reader.result
+            }
+		reader.readAsText(file)
+	}
+    
+    var inputfile = document.createElement('input') as any;
+    inputfile.type = 'file';
+    inputfile.onchange = readFile
+    inputfile.click();
+    
+}
+
 const button = document.getElementById("buttonId")!;
 button.addEventListener('click', handleScanAndParse);
+
+const upload_button = document.getElementById("uploadButtonId")!;
+upload_button.addEventListener('click', handleUpload);
 
 /*
 read x; {input an integer}
